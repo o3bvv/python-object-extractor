@@ -40,7 +40,7 @@ REQUIREMENTS, DEPENDENCIES = parse_requirements(__here__ / "requirements.txt")
 
 setup(
     name="python-object-extractor",
-    version="1.0.0",
+    version="1.0.0b1",
     description=(
         "Extract Python object (like class, function, etc) with its "
         "dependencies from local project."
@@ -57,6 +57,7 @@ setup(
     install_requires=REQUIREMENTS,
     dependency_links=DEPENDENCIES,
     classifiers=[
+        "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Environment :: Console",

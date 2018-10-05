@@ -39,16 +39,22 @@ def load_args() -> argparse.Namespace:
     parser.add_argument(
         '-m', '--output_module_path',
         dest='output_module_path',
-        type=Path,
-        default='main.py',
-        help="path to output Python module containing extracted object",
+        type=str,
+        default='-',
+        help=(
+            "path to output Python module containing extracted object, "
+            "for example, 'main.py'. Use '-' to output to STDOUT"
+        ),
     )
     parser.add_argument(
         '-r', '--output_requirements_path',
         dest='output_requirements_path',
-        type=Path,
-        default='requirements.txt',
-        help="path to output requirements file",
+        type=str,
+        default='-',
+        help=(
+            "path to output requirements file, for example, "
+            "'requirements.txt'. Use '-' to output to STDOUT"
+        ),
     )
     return parser.parse_args()
 

@@ -1,3 +1,6 @@
+import io
+import sys
+
 from typing import Dict, Iterable
 
 from python_object_extractor.descriptors import ObjectDescriptor
@@ -16,32 +19,42 @@ def output(
     imports: ObjectImportsGroupped,
     references_to_aliases: Dict[ObjectReference, str],
 ) -> None:
-    with open(module_path, 'wt') as f:
-        if imports.stdlib:
-            f.write(format_imports(imports.stdlib))
-            f.write("\n")
+    if module_path == '-':
+        output_module(sys.stdout, descriptors, imports, references_to_aliases)
+    else:
+        with open(module_path, 'wt') as f:
+            output_module(f, descriptors, imports, references_to_aliases)
 
-        if imports.third_party:
-            f.write(format_imports(imports.third_party))
-            f.write("\n")
+    if requirements_path == '-':
+        output_requirements(sys.stdout, imports)
+    else:
+        with open(requirements_path, 'wt') as f:
+            output_requirements(f, imports)
 
-        if imports.stdlib or imports.third_party:
-            f.write("\n")
 
-        for descriptor in descriptors:
-            f.write(format_object_source(descriptor, references_to_aliases))
-            f.write("\n\n")
+def output_module(
+    output_stream: io.TextIOBase,
+    descriptors: Iterable[ObjectDescriptor],
+    imports: ObjectImportsGroupped,
+    references_to_aliases: Dict[ObjectReference, str],
+) -> None:
+    if imports.stdlib:
+        output_stream.write(format_imports(imports.stdlib))
+        output_stream.write("\n")
 
-    with open(requirements_path, 'wt') as f:
-        requirements = {
-            get_module_requirement(get_module_by_name(
-                module_name=object_import.object_reference.module_name,
-            ))
-            for object_import in imports.third_party
-        }
-        requirements = sorted(["{}\n".format(x) for x in requirements])
-        f.writelines(requirements)
-        f.write("\n")
+    if imports.third_party:
+        output_stream.write(format_imports(imports.third_party))
+        output_stream.write("\n")
+
+    if imports.stdlib or imports.third_party:
+        output_stream.write("\n")
+
+    for descriptor in descriptors:
+        source = format_object_source(descriptor, references_to_aliases)
+        output_stream.write(source)
+        output_stream.write("\n\n")
+
+    output_stream.flush()
 
 
 def format_imports(imports: Iterable[ObjectImport]) -> str:
@@ -62,3 +75,19 @@ def format_imports(imports: Iterable[ObjectImport]) -> str:
         lines.append("")
 
     return "\n".join(lines)
+
+
+def output_requirements(
+    output_stream: io.TextIOBase,
+    imports: ObjectImportsGroupped,
+) -> None:
+    requirements = {
+        get_module_requirement(get_module_by_name(
+            module_name=object_import.object_reference.module_name,
+        ))
+        for object_import in imports.third_party
+    }
+    requirements = sorted(["{}\n".format(x) for x in requirements])
+    output_stream.writelines(requirements)
+    output_stream.write("\n")
+    output_stream.flush()

@@ -52,9 +52,9 @@ def extract_attributes_access_chains(
     tree = ast.parse(source)
     results = []
 
-    for ast_node in ast.walk(tree):
-        if isinstance(ast_node, ast.Attribute):
-            chain = _traverse_attribute(ast_node)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute):
+            chain = _traverse_attribute(node)
             if chain:
                 results.append(AttributesAccessChain(
                     object_name=chain[0],

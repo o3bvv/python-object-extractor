@@ -4,8 +4,7 @@ from types import ModuleType
 from typing import Dict, List
 
 from python_object_extractor.descriptors import ObjectDescriptor
-from python_object_extractor.graph import make_objects_graph
-from python_object_extractor.graph import traverse_objects_graph
+from python_object_extractor.graph import sort_descriptors_topologically
 from python_object_extractor.imports import get_module_imports
 from python_object_extractor.imports import get_object_imports
 from python_object_extractor.imports import group_imports_by_origin
@@ -31,14 +30,7 @@ def inspect_object_with_children(
         known_objects=references_to_descriptors,
         project_path=project_path,
     )
-    graph_root = make_objects_graph(
-        object_reference=object_reference,
-        objects_references_to_descriptors=references_to_descriptors,
-    )
-    return [
-        node.object_descriptor
-        for node in reversed(list(traverse_objects_graph(graph_root)))
-    ]
+    return sort_descriptors_topologically(references_to_descriptors.values())
 
 
 def _inspect_object_with_children(

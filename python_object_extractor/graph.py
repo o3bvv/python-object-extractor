@@ -1,107 +1,63 @@
-from typing import Dict, Iterator
+import operator
+
+from typing import Iterable, List
 
 from python_object_extractor.descriptors import ObjectDescriptor
 from python_object_extractor.references import ObjectReference
 
 
-class ObjectsGraphNode:
+class GraphNode:
     __slots__ = [
-        'object_reference',
-        'object_descriptor',
-        'depth',
-        'children',
+        'descriptor',
+        'incoming_edges',
     ]
 
     def __init__(
         self,
-        object_reference: ObjectReference,
-        object_descriptor: ObjectDescriptor,
-        depth: int,
+        descriptor: ObjectDescriptor,
+        incoming_edges: List[ObjectReference],
     ):
-        self.object_reference = object_reference
-        self.object_descriptor = object_descriptor
-        self.depth = depth
-        self.children = list()
+        self.descriptor = descriptor
+        self.incoming_edges = incoming_edges
 
-    def __repr__(self) -> str:
-        return (
-            f"<ObjectsGraphNode("
-            f"object_reference={repr(self.object_reference)}, "
-            f"depth={self.depth}"
-            f")>"
+
+def sort_descriptors_topologically(
+    descriptors: Iterable[ObjectDescriptor]
+) -> List[ObjectDescriptor]:
+    nodes = [
+        GraphNode(
+            descriptor=descriptor,
+            incoming_edges=(
+                (
+                        descriptor.global_imports
+                    and descriptor.global_imports.project
+                    and set([
+                        x.object_reference
+                        for x in descriptor.global_imports.project
+                    ])
+                )
+                or []
+            ),
         )
+        for descriptor in descriptors
+    ]
+    sorting_key = operator.attrgetter('descriptor.object_reference')
 
+    leafs = [node for node in nodes if not node.incoming_edges]
+    leafs = list(sorted(leafs, key=sorting_key))
+    nodes = [x for x in nodes if x not in leafs]
 
-def make_objects_graph(
-    object_reference: ObjectReference,
-    objects_references_to_descriptors: Dict[ObjectReference, ObjectDescriptor],
-) -> ObjectsGraphNode:
-    objects_references_to_nodes = dict()
-    return _make_objects_graph(
-        object_reference=object_reference,
-        objects_references_to_descriptors=objects_references_to_descriptors,
-        objects_references_to_nodes=objects_references_to_nodes,
-        depth=0,
-    )
+    results = []
 
+    while leafs:
+        leaf = leafs.pop()
+        results.append(leaf.descriptor)
 
-def _make_objects_graph(
-    object_reference: ObjectReference,
-    objects_references_to_descriptors: Dict[ObjectReference, ObjectDescriptor],
-    objects_references_to_nodes: Dict[ObjectReference, ObjectsGraphNode],
-    depth: int,
-) -> ObjectsGraphNode:
-    node = objects_references_to_nodes.get(object_reference)
+        for node in nodes.copy():
+            if leaf.descriptor.object_reference in node.incoming_edges:
+                node.incoming_edges.remove(leaf.descriptor.object_reference)
+                if not node.incoming_edges:
+                    leafs.append(node)
+                    nodes.remove(node)
 
-    if node:
-        if node.depth < depth:
-            node.depth = depth
-        return node
-
-    descriptor = objects_references_to_descriptors[object_reference]
-    node = ObjectsGraphNode(
-        object_reference=object_reference,
-        object_descriptor=descriptor,
-        depth=depth,
-    )
-    objects_references_to_nodes[object_reference] = node
-
-    children_references = set()
-
-    if descriptor.global_imports and descriptor.global_imports.project:
-        for item in descriptor.global_imports.project:
-            children_references.add(item.object_reference)
-
-    node.children.extend([
-        _make_objects_graph(
-            object_reference=child_reference,
-            objects_references_to_descriptors=objects_references_to_descriptors,
-            objects_references_to_nodes=objects_references_to_nodes,
-            depth=depth + 1,
-        )
-        for child_reference in sorted(children_references)
-    ])
-
-    return node
-
-
-def _traverse_objects_graph(
-    node: ObjectsGraphNode,
-    depth: int,
-) -> Iterator[ObjectsGraphNode]:
-    if node.depth > depth:
-        return
-
-    yield node
-
-    for child in node.children:
-        yield from _traverse_objects_graph(
-            node=child,
-            depth=depth + 1,
-        )
-
-
-def traverse_objects_graph(
-    root: ObjectsGraphNode,
-) -> Iterator[ObjectsGraphNode]:
-    yield from _traverse_objects_graph(root, 0)
+    return results

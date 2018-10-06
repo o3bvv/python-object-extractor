@@ -1,7 +1,7 @@
 import builtins
 import symtable
 
-from typing import List
+from typing import List, Set
 
 
 BUILTINS = set(dir(builtins) + ['__class__', ])
@@ -16,7 +16,7 @@ def extract_symbols_from_source(
 
 def extract_symbols_from_table(
     table: symtable.SymbolTable,
-    parent_params: set = None,
+    parent_symbols: Set = None,
 ) -> List[symtable.Symbol]:
     result = [
         x
@@ -24,21 +24,21 @@ def extract_symbols_from_table(
         if (
                 not x.is_parameter()
             and not x.is_assigned()
-            and not (parent_params and x.get_name() in parent_params)
+            and not (parent_symbols and x.get_name() in parent_symbols)
             and x.is_referenced()
             and (x.get_name() not in BUILTINS)
         )
     ]
 
     for child in table.get_children():
-        params = {
+        own_symbols = {
             x.get_name()
             for x in table.get_symbols()
-            if x.is_parameter()
+            if x.is_parameter() or x.is_assigned()
         }
-        if parent_params:
-            params |= parent_params
-        result.extend(extract_symbols_from_table(child, params))
+        if parent_symbols:
+            own_symbols |= parent_symbols
+        result.extend(extract_symbols_from_table(child, own_symbols))
 
     return result
 

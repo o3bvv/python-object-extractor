@@ -1,5 +1,4 @@
 import ast
-import dis
 import inspect
 import itertools
 import re
@@ -7,12 +6,10 @@ import re
 from types import ModuleType
 from typing import Dict, Set, Iterator, Iterable, Optional
 
+import astor
+
 from python_object_extractor.descriptors import ObjectDescriptor
 from python_object_extractor.references import ObjectReference
-
-
-STORE_OP = 'STORE_NAME'
-TERMINATION_OP_PREFIXES = {'POP', 'RAISE', 'IMPORT', 'RETURN', 'END', 'STORE'}
 
 
 def get_object_source(module: ModuleType, target: object, symbol: str) -> str:
@@ -23,34 +20,26 @@ def get_object_source(module: ModuleType, target: object, symbol: str) -> str:
     ):
         return inspect.getsource(target)
 
-    src = inspect.getsource(module)
-    co = compile(src, module.__file__, 'exec')
-    lines = src.splitlines()
-    start_line = 0
-    last_line = None
-    end_line = None
+    source = inspect.getsource(module)
+    return get_assignment_source(source, symbol)
 
-    for instruction in reversed(list(dis.get_instructions(co))):
-        if instruction.starts_line is not None:
-            last_line = instruction.starts_line
 
-        if instruction.opname == STORE_OP and instruction.argval == symbol:
-            end_line = (
-                len(lines)
-                if last_line is None
-                else last_line - 1
-            )
-        elif (
-            (end_line is not None)
-            and any(
-                instruction.opname.startswith(x)
-                for x in TERMINATION_OP_PREFIXES
-            )
-        ):
-            start_line = last_line - 1
-            break
+def get_assignment_source(source: str, symbol: str) -> str:
+    root = ast.parse(source)
 
-    return '\n'.join(lines[start_line:end_line])
+    for node in ast.iter_child_nodes(root):
+        if isinstance(node, ast.AugAssign) and node.target.id == symbol:
+            return astor.to_source(node)
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == symbol:
+                    value = astor.to_source(node.value)
+                    return f"{symbol} = {value}"
+                elif hasattr(target, 'elts'):
+                    for i, name in enumerate(target.elts):
+                        if name.id == symbol:
+                            value = astor.to_source(node.value.elts[i])
+                            return f"{symbol} = {value}"
 
 
 def format_object_source(

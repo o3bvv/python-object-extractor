@@ -17,6 +17,7 @@ Synopsis:
 
   usage: python-object-extractor [-h] [-p PROJECT_PATH] [-m OUTPUT_MODULE_PATH]
                                  [-r OUTPUT_REQUIREMENTS_PATH]
+                                 [-n OUTPUT_OBJECT_NAME]
                                  object_reference
 
   Extract Python object with its dependencies from local project.
@@ -37,19 +38,34 @@ Synopsis:
                           path to output requirements file, for example,
                           'requirements.txt'. Use '-' to output to STDOUT
                           (default: -)
+    -n OUTPUT_OBJECT_NAME, --output_object_name OUTPUT_OBJECT_NAME
+                          output name of target reference. By default it's taken
+                          from 'object_reference'. For example, output object
+                          name will be 'object' for object reference
+                          'importable.module:object' (default: None)
 
 
 Usage examples
 --------------
 
-Extract function from package located in current directory and print to ``STDOUT``:
+Extract function from package located in current directory and print to
+``STDOUT``:
 
 .. code-block:: bash
 
   python-object-extractor package.module:function
 
 
-Extract function from package located in a given directory and print to ``STDOUT``:
+Extract function from package located in current directory, name it as ``main``
+and print results to ``STDOUT``:
+
+.. code-block:: bash
+
+  python-object-extractor package.module:function -n main
+
+
+Extract function from package located in a given directory and print to
+``STDOUT``:
 
 .. code-block:: bash
 

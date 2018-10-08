@@ -56,6 +56,17 @@ def load_args() -> argparse.Namespace:
             "'requirements.txt'. Use '-' to output to STDOUT"
         ),
     )
+    parser.add_argument(
+        '-n', '--output_object_name',
+        dest='output_object_name',
+        type=str,
+        default=None,
+        help=(
+            "output name of target reference. By default it's taken from "
+            "'object_reference'. For example, output object name will be "
+            "'object' for object reference 'importable.module:object'"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -67,6 +78,7 @@ def main() -> None:
         sys.path.insert(0, project_path)
 
     module_name, object_name = args.object_reference.split(':')
+    output_object_name = args.output_object_name or object_name
     object_reference = ObjectReference(
         module_name=module_name,
         object_name=object_name,
@@ -87,7 +99,7 @@ def main() -> None:
         x.object_reference: x.alias or x.object_reference.object_name
         for x in imports
     }
-    all_references_to_aliases[object_reference] = project_references_to_aliases[object_reference]
+    all_references_to_aliases[object_reference] = output_object_name
 
     substitute_aliases_of_groupped_imports(
         groupped_imports=[

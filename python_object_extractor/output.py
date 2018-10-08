@@ -1,6 +1,7 @@
 import io
 import sys
 
+from pathlib import Path
 from typing import Dict, Iterable
 
 from python_object_extractor.descriptors import ObjectDescriptor
@@ -22,13 +23,17 @@ def output(
     if module_path == '-':
         output_module(sys.stdout, descriptors, imports, references_to_aliases)
     else:
-        with open(module_path, 'wt') as f:
+        module_path = Path(module_path)
+        module_path.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
+        with module_path.open('wt') as f:
             output_module(f, descriptors, imports, references_to_aliases)
 
     if requirements_path == '-':
         output_requirements(sys.stdout, imports)
     else:
-        with open(requirements_path, 'wt') as f:
+        requirements_path = Path(requirements_path)
+        requirements_path.parent.mkdir(mode=0o755, parents=True, exist_ok=True)
+        with requirements_path.open('wt') as f:
             output_requirements(f, imports)
 
 

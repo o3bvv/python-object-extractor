@@ -57,7 +57,7 @@ setup(
     install_requires=REQUIREMENTS,
     dependency_links=DEPENDENCIES,
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Environment :: Console",

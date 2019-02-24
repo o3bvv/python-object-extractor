@@ -1,6 +1,9 @@
 Python Object Extractor
 =======================
 
+|pypi_package| |python_versions| |license|
+
+
 Extract a Python object (like class, function, etc) with its dependencies from
 a local project into a stand-alone module with a requirements file.
 
@@ -91,3 +94,13 @@ to files ``main.py`` and ``requirements.txt``:
 .. code-block:: bash
 
   python-object-extractor package.module:function -p /path/to/project -m ./main.py -r ./requirements.txt
+
+
+.. |pypi_package| image:: http://img.shields.io/pypi/v/python-object-extractor.svg?style=flat
+   :target: http://badge.fury.io/py/python-object-extractor/
+
+.. |python_versions| image:: https://img.shields.io/badge/Python-3.7-brightgreen.svg?style=flat
+  :alt: Supported versions of Python
+
+.. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat
+  :target: https://github.com/oblalex/python-object-extractor/blob/master/LICENSE

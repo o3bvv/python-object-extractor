@@ -2,7 +2,18 @@ Python Object Extractor
 =======================
 
 Extract Python object (like class, function, etc) with its dependencies from
-local project.
+a local project into a stand-alone module with requirements file.
+
+
+Use cases
+---------
+
+The primary use case of this tool is to allow views of a web app's backend to
+stay organized and conforming to DRY principle while at the same time to be
+deployed to serverless computing platforms like AWS Lambda, GCP functions,
+Azure Functions, etc with minimal weight and dependencies installation time.
+
+Any other use cases are welcome as well.
 
 
 Deliverables
@@ -40,15 +51,15 @@ Synopsis:
                           (default: -)
     -n OUTPUT_OBJECT_NAME, --output_object_name OUTPUT_OBJECT_NAME
                           output name of target reference. By default it's taken
-                          from 'object_reference'. For example, output object
-                          name will be 'object' for object reference
-                          'importable.module:object' (default: None)
+                          from 'object_reference'. For example, for object
+                          reference 'importable.module:object' an output object
+                          name will be 'object'  (default: None)
 
 
 Usage examples
 --------------
 
-Extract function from package located in current directory and print to
+Extract a function from a package located in current directory and print to
 ``STDOUT``:
 
 .. code-block:: bash
@@ -56,24 +67,24 @@ Extract function from package located in current directory and print to
   python-object-extractor package.module:function
 
 
-Extract function from package located in current directory, name it as ``main``
-and print results to ``STDOUT``:
+Extract a function from a package located in current directory, name it as
+``main`` and print results to ``STDOUT``:
 
 .. code-block:: bash
 
   python-object-extractor package.module:function -n main
 
 
-Extract function from package located in a given directory and print to
-``STDOUT``:
+Extract a function from a package located in a given directory and print results
+to ``STDOUT``:
 
 .. code-block:: bash
 
   python-object-extractor package.module:function -p /path/to/project
 
 
-Extract function from package located in a given directory and save results to
-files ``main.py`` and ``requirements.txt``:
+Extract a function from a package located in a given directory and save results
+to files ``main.py`` and ``requirements.txt``:
 
 
 .. code-block:: bash

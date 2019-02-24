@@ -40,7 +40,7 @@ REQUIREMENTS, DEPENDENCIES = parse_requirements(__here__ / "requirements.txt")
 
 setup(
     name="python-object-extractor",
-    version="1.0.0b1",
+    version="1.0.0",
     description=(
         "Extract Python object (like class, function, etc) with its "
         "dependencies from local project."

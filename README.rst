@@ -1,8 +1,8 @@
 Python Object Extractor
 =======================
 
-Extract Python object (like class, function, etc) with its dependencies from
-a local project into a stand-alone module with requirements file.
+Extract a Python object (like class, function, etc) with its dependencies from
+a local project into a stand-alone module with a requirements file.
 
 
 Use cases
@@ -10,8 +10,9 @@ Use cases
 
 The primary use case of this tool is to allow views of a web app's backend to
 stay organized and conforming to DRY principle while at the same time to be
-deployed to serverless computing platforms like AWS Lambda, GCP functions,
-Azure Functions, etc with minimal weight and dependencies installation time.
+able to be deployed to serverless computing platforms like AWS Lambda,
+GCP functions, Azure Functions, etc with minimal weight and dependencies'
+installation time.
 
 Any other use cases are welcome as well.
 
